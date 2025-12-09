@@ -1,22 +1,20 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://mern1-swzv.onrender.com", 
 });
 
-// AUTH
-export const registerUser = (data) => API.post("/auth/register", data);
-export const loginUser = (data) => API.post("/auth/login", data);
+// attach token
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem("token");
+  if (token) req.headers.Authorization = `Bearer ${token}`;
+  return req;
+});
 
-// EXPENSES
-export const getExpenses = (token) =>
-  API.get("/expenses", { headers: { Authorization: `Bearer ${token}` } });
+export const registerUser = (data) => API.post("/api/auth/register", data);
+export const loginUser = (data) => API.post("/api/auth/login", data);
+export const getExpenses = (token) => API.get("/api/expenses");
+export const createExpense = (payload) => API.post("/api/expenses", payload);
+export const updateExpense = (id, payload) => API.put(`/api/expenses/${id}`, payload);
+export const deleteExpense = (id) => API.delete(`/api/expenses/${id}`);
 
-export const createExpense = (data, token) =>
-  API.post("/expenses", data, { headers: { Authorization: `Bearer ${token}` } });
-
-export const updateExpense = (id, data, token) =>
-  API.put(`/expenses/${id}`, data, { headers: { Authorization: `Bearer ${token}` } });
-
-export const deleteExpense = (id, token) =>
-  API.delete(`/expenses/${id}`, { headers: { Authorization: `Bearer ${token}` } });
